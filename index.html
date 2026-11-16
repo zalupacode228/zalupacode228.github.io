@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VibeVPN — Официальный сайт</title>
+  <style>
+    :root {
+      --bg: #0d0c11;
+      --card-bg: #16141c;
+      --card-border: rgba(255, 255, 255, 0.08);
+      --primary: #d0bcff;
+      --primary-container: #4f378b;
+      --text: #f0ecf4;
+      --muted: #948f99;
+      --success: #00c853;
+      --radius: 14px;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      cursor: none !important;
+    }
+
+    .fake-cursor {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 24px;
+      height: 24px;
+      pointer-events: none;
+      z-index: 999999;
+      transform: translate3d(-100px, -100px, 0);
+      opacity: 0;
+      transition: opacity 0.15s ease;
+      will-change: transform;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .container {
+      max-width: 540px;
+      width: 100%;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 32px 28px;
+      text-align: center;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+      position: relative;
+      z-index: 10;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(208, 188, 255, 0.1);
+      color: var(--primary);
+      border: 1px solid rgba(208, 188, 255, 0.25);
+      border-radius: 999px;
+      padding: 4px 12px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.4px;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+    }
+
+    p.subtitle {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+      margin-bottom: 24px;
+    }
+
+    .buttons-zone {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-height: 180px;
+      position: relative;
+    }
+
+    .action-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 14px 20px;
+      border-radius: var(--radius);
+      font-size: 13px;
+      font-weight: 600;
+      border: 1px solid transparent;
+      outline: none;
+      transition: background-color 0.15s, border-color 0.15s;
+      white-space: nowrap;
+    }
+
+    button:focus, button:focus-visible, .action-btn:focus, .action-btn:focus-visible {
+      outline: none !important;
+      box-shadow: none !important;
+    }
+
+    .btn-download {
+      background-color: var(--primary-container);
+      color: #eaddff;
+      border-color: rgba(208, 188, 255, 0.3);
+    }
+
+    .btn-github {
+      background-color: #211f26;
+      color: var(--text);
+      border-color: var(--card-border);
+    }
+
+    .btn-support {
+      background-color: #211f26;
+      color: var(--muted);
+      border-color: var(--card-border);
+    }
+
+    /* Floating runaway state */
+    .evasive {
+      position: fixed !important;
+      z-index: 9999;
+      width: auto !important;
+      min-width: 200px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+      transition: left 0.3s cubic-bezier(0.2, 0.9, 0.3, 1), top 0.3s cubic-bezier(0.2, 0.9, 0.3, 1);
+    }
+
+    @keyframes squash-x {
+      0% { transform: scale(1, 1); }
+      35% { transform: scale(0.72, 1.28); }
+      100% { transform: scale(1, 1); }
+    }
+
+    @keyframes squash-y {
+      0% { transform: scale(1, 1); }
+      35% { transform: scale(1.28, 0.72); }
+      100% { transform: scale(1, 1); }
+    }
+
+    .squash-x {
+      animation: squash-x 0.22s ease-out;
+    }
+
+    .squash-y {
+      animation: squash-y 0.22s ease-out;
+    }
+
+    @keyframes screen-thud {
+      0% { transform: translate(0, 0); }
+      20% { transform: translate(-3px, 2px); }
+      40% { transform: translate(3px, -2px); }
+      60% { transform: translate(-1px, 1px); }
+      100% { transform: translate(0, 0); }
+    }
+
+    body.thud {
+      animation: screen-thud 0.15s ease-out;
+    }
+
+    .footer-note {
+      margin-top: 24px;
+      font-size: 11px;
+      color: var(--muted);
+      opacity: 0.7;
+    }
+
+    /* Modal if someone manages Tab+Enter */
+    .troll-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(6px);
+      z-index: 10000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .troll-modal.show {
+      display: flex;
+    }
+
+    .modal-box {
+      background: var(--card-bg);
+      border: 1px solid var(--primary);
+      border-radius: 18px;
+      padding: 24px 30px;
+      text-align: center;
+      max-width: 360px;
+    }
+
+    .modal-box h3 {
+      margin-bottom: 8px;
+    }
+
+    .modal-box p {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    .modal-box button {
+      background: var(--primary-container);
+      color: #fff;
+      border: none;
+      padding: 8px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+  <noscript>
+    <style>
+      .container, #modal, #fake-cursor { display: none !important; }
+    </style>
+    <div style="position: fixed; inset: 0; background: #0d0c11; color: #f0ecf4; z-index: 999999999; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: -apple-system, BlinkMacSystemFont, sans-serif; text-align: center; padding: 24px;">
+      <h1 style="font-size: 28px; font-weight: 800; margin-bottom: 12px; letter-spacing: -0.5px;">JavaScript отключен</h1>
+      <p style="color: #948f99; font-size: 15px; max-width: 480px; line-height: 1.6; margin-bottom: 20px;">
+        Протокол безопасности VibeVPN требует включенного JavaScript для работы с узлами. Отключение JS заблокировано.
+      </p>
+      <div style="font-family: monospace; background: #16141c; border: 1px solid rgba(255,255,255,0.08); padding: 10px 18px; border-radius: 8px; font-size: 12px; color: #d0bcff;">
+        STATUS: NOSCRIPT_SECURITY_OVERLAY
+      </div>
+    </div>
+  </noscript>
+
+  <!-- Тут нет ссылок и скрытых данных. Кнопки фейковые. Отдохни. -->
+
+  <div class="container">
+    <h1 style="margin-bottom: 24px;">zalupacode228</h1>
+
+    <div class="buttons-zone" id="zone">
+      <button class="action-btn btn-download runaway-btn" data-name="Скачать VibeVPN" tabindex="-1">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
+        Скачать VibeVPN (Windows x64)
+      </button>
+
+      <button class="action-btn btn-github runaway-btn" data-name="GitHub Профиль" tabindex="-1">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+        GitHub профиль разработчика
+      </button>
+
+      <button class="action-btn btn-support runaway-btn" data-name="Купить подписку" tabindex="-1">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 14h-2v-2h2v2zm0-4h-2V7h2v5z"/></svg>
+        Купить безлимитный доступ
+      </button>
+    </div>
+
+    <div class="footer-note">
+      Все права защищены. Нажатие на кнопки строго запрещено протоколом безопасности.
+    </div>
+  </div>
+
+  <div class="troll-modal" id="modal">
+    <div class="modal-box">
+      <h3>Читер обнаружен</h3>
+      <p id="modal-text">Ты как вообще умудрился нажать?</p>
+      <button onclick="closeModal()" tabindex="-1">Закрыть</button>
+    </div>
+  </div>
+
+  <div id="fake-cursor" class="fake-cursor">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" style="filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));">
+      <path d="M3 3L10.07 20.97L13.58 13.58L20.97 10.07L3 3Z" fill="#ffffff" stroke="#111111" stroke-width="1.8" stroke-linejoin="round"/>
+    </svg>
+  </div>
+
+  <script>
+    const modal = document.getElementById('modal');
+    const modalText = document.getElementById('modal-text');
+    const fakeCursor = document.getElementById('fake-cursor');
+    const buttons = document.querySelectorAll('.runaway-btn');
+
+    const isTouch = window.matchMedia('(pointer: coarse)').matches;
+    if (isTouch && fakeCursor) {
+      fakeCursor.style.display = 'none';
+    }
+
+    let posX = -9999;
+    let posY = -9999;
+    let vx = 0;
+    let vy = 0;
+    let cursorActive = false;
+
+    function escapeButton(btn, mouseX, mouseY, isFlick = false) {
+      const rect = btn.getBoundingClientRect();
+      const btnW = rect.width || 200;
+      const btnH = rect.height || 48;
+
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+
+      const padding = 16;
+      const maxX = vw - btnW - padding;
+      const maxY = vh - btnH - padding;
+
+      if (!btn.classList.contains('evasive')) {
+        btn.classList.add('evasive');
+      }
+
+      const startX = rect.left;
+      const startY = rect.top;
+      const btnCenterX = startX + btnW / 2;
+      const btnCenterY = startY + btnH / 2;
+
+      let dx = btnCenterX - mouseX;
+      let dy = btnCenterY - mouseY;
+
+      const len = Math.hypot(dx, dy) || 1;
+      let dirX = dx / len;
+      let dirY = dy / len;
+
+      if (isFlick) {
+        // High-velocity snap: raycast straight into the nearest screen wall & ricochet
+        let tx = Infinity;
+        let ty = Infinity;
+
+        if (dirX < -0.001) tx = (padding - startX) / dirX;
+        else if (dirX > 0.001) tx = (maxX - startX) / dirX;
+
+        if (dirY < -0.001) ty = (padding - startY) / dirY;
+        else if (dirY > 0.001) ty = (maxY - startY) / dirY;
+
+        const tHit = Math.min(tx > 0 ? tx : Infinity, ty > 0 ? ty : Infinity);
+        const hitX = Math.max(padding, Math.min(maxX, startX + dirX * tHit));
+        const hitY = Math.max(padding, Math.min(maxY, startY + dirY * tHit));
+
+        const hitVertical = tHit === tx;
+        let reboundDirX = hitVertical ? -dirX : dirX;
+        let reboundDirY = hitVertical ? dirY : -dirY;
+
+        let reboundAngle = Math.atan2(reboundDirY, reboundDirX) + (Math.random() - 0.5) * 0.4;
+        const reboundDist = Math.floor(Math.random() * 140) + 180;
+        const reboundX = Math.max(padding, Math.min(maxX, hitX + Math.cos(reboundAngle) * reboundDist));
+        const reboundY = Math.max(padding, Math.min(maxY, hitY + Math.sin(reboundAngle) * reboundDist));
+
+        // STAGE 1: Supersonic launch to the wall
+        btn.style.transition = 'left 0.14s cubic-bezier(0.2, 0.8, 0.3, 1), top 0.14s cubic-bezier(0.2, 0.8, 0.3, 1)';
+        btn.style.left = `${Math.round(hitX)}px`;
+        btn.style.top = `${Math.round(hitY)}px`;
+
+        // STAGE 2: Wall impact, squash, micro screen-thud, and ricochet bounce
+        clearTimeout(btn.reboundTimeout);
+        btn.reboundTimeout = setTimeout(() => {
+          document.body.classList.remove('thud');
+          void document.body.offsetWidth;
+          document.body.classList.add('thud');
+          setTimeout(() => document.body.classList.remove('thud'), 150);
+
+          const squashClass = hitVertical ? 'squash-x' : 'squash-y';
+          btn.classList.add(squashClass);
+          setTimeout(() => btn.classList.remove(squashClass), 220);
+
+          btn.style.transition = 'left 0.32s cubic-bezier(0.1, 0.9, 0.2, 1), top 0.32s cubic-bezier(0.1, 0.9, 0.2, 1)';
+          btn.style.left = `${Math.round(reboundX)}px`;
+          btn.style.top = `${Math.round(reboundY)}px`;
+        }, 130);
+
+        return;
+      }
+
+      // Normal dodge
+      let angle = Math.atan2(dy, dx);
+      if (len < 1) angle = Math.random() * Math.PI * 2;
+      else angle += (Math.random() - 0.5) * 0.8;
+
+      const leap = Math.floor(Math.random() * 140) + 160;
+      let targetX = startX + Math.cos(angle) * leap;
+      let targetY = startY + Math.sin(angle) * leap;
+
+      if (targetX < padding) targetX = Math.random() * (vw / 3) + padding;
+      if (targetX > maxX) targetX = vw - btnW - padding - Math.random() * (vw / 3);
+      if (targetY < padding) targetY = Math.random() * (vh / 3) + padding;
+      if (targetY > maxY) targetY = vh - btnH - padding - Math.random() * (vh / 3);
+
+      btn.style.transition = 'left 0.3s cubic-bezier(0.2, 0.9, 0.3, 1), top 0.3s cubic-bezier(0.2, 0.9, 0.3, 1)';
+      btn.style.left = `${Math.round(targetX)}px`;
+      btn.style.top = `${Math.round(targetY)}px`;
+    }
+
+    function checkRunaways(sourceX, sourceY, isFlick = false) {
+      if (sourceX < 0 || sourceY < 0) return;
+
+      buttons.forEach(btn => {
+        const rect = btn.getBoundingClientRect();
+        
+        // Distance to the closest point of button bounding box
+        const closestX = Math.max(rect.left, Math.min(sourceX, rect.right));
+        const closestY = Math.max(rect.top, Math.min(sourceY, rect.bottom));
+        const dist = Math.hypot(sourceX - closestX, sourceY - closestY);
+
+        const triggerDist = isFlick ? 160 : 110;
+        if (dist < triggerDist) {
+          escapeButton(btn, sourceX, sourceY, isFlick);
+        }
+      });
+    }
+
+    document.addEventListener('mousemove', (e) => {
+      if (!cursorActive) {
+        cursorActive = true;
+        // Spawn cursor away from the center buttons
+        posX = window.innerWidth - e.clientX;
+        posY = window.innerHeight - e.clientY;
+        fakeCursor.style.opacity = '1';
+        fakeCursor.style.transform = `translate3d(${posX}px, ${posY}px, 0)`;
+        return;
+      }
+
+      const dx = e.movementX || 0;
+      const dy = e.movementY || 0;
+      const flickSpeed = Math.hypot(dx, dy);
+      const isFlick = flickSpeed > 14;
+
+      // Controlled inverted momentum
+      vx -= dx * 0.35;
+      vy -= dy * 0.35;
+
+      const maxSpeed = 18;
+      const speed = Math.hypot(vx, vy);
+      if (speed > maxSpeed) {
+        vx = (vx / speed) * maxSpeed;
+        vy = (vy / speed) * maxSpeed;
+      }
+
+      checkRunaways(e.clientX, e.clientY, isFlick);
+    });
+
+    // Physics loop for icy cursor
+    function loop() {
+      if (cursorActive && !isTouch) {
+        posX += vx;
+        posY += vy;
+
+        // Friction / glide
+        vx *= 0.84;
+        vy *= 0.84;
+        if (Math.abs(vx) < 0.05) vx = 0;
+        if (Math.abs(vy) < 0.05) vy = 0;
+
+        // Elastic wall bounce
+        const margin = 8;
+        const maxX = window.innerWidth - 24;
+        const maxY = window.innerHeight - 24;
+
+        if (posX < margin) {
+          posX = margin;
+          vx = -vx * 0.4;
+        } else if (posX > maxX) {
+          posX = maxX;
+          vx = -vx * 0.4;
+        }
+
+        if (posY < margin) {
+          posY = margin;
+          vy = -vy * 0.4;
+        } else if (posY > maxY) {
+          posY = maxY;
+          vy = -vy * 0.4;
+        }
+
+        fakeCursor.style.transform = `translate3d(${posX}px, ${posY}px, 0)`;
+
+        // Escape from fake cursor too (with flick check)
+        const fakeSpeed = Math.hypot(vx, vy);
+        const isFakeFlick = fakeSpeed > 10;
+        checkRunaways(posX, posY, isFakeFlick);
+      }
+
+      requestAnimationFrame(loop);
+    }
+    requestAnimationFrame(loop);
+
+    // Block right-click on capture phase (including Shift+ПКМ)
+    window.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      buttons.forEach(btn => escapeButton(btn, window.innerWidth / 2, window.innerHeight / 2, true));
+    }, true);
+
+    buttons.forEach(btn => {
+      const emergency = (e) => {
+        escapeButton(btn, e.clientX || window.innerWidth / 2, e.clientY || window.innerHeight / 2, true);
+      };
+
+      btn.addEventListener('pointerenter', emergency);
+      btn.addEventListener('mouseenter', emergency);
+      btn.addEventListener('mouseover', emergency);
+      btn.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        emergency(e);
+      });
+      btn.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        emergency(e);
+      });
+      btn.addEventListener('touchstart', (e) => {
+        const touch = e.touches[0];
+        escapeButton(btn, touch.clientX, touch.clientY);
+        e.preventDefault();
+      });
+
+      btn.addEventListener('focus', () => {
+        btn.blur();
+        escapeButton(btn, window.innerWidth / 2, window.innerHeight / 2);
+      });
+
+      btn.addEventListener('focusin', () => {
+        btn.blur();
+        escapeButton(btn, window.innerWidth / 2, window.innerHeight / 2);
+      });
+
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        btn.blur();
+        escapeButton(btn, window.innerWidth / 2, window.innerHeight / 2);
+      });
+    });
+
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('#modal button') || e.target === modal) {
+        closeModal();
+      }
+    });
+
+    function triggerModal(name) {
+      modalText.innerText = `Ты как-то умудрился нажать на «${name}», но протокол защиты VibeVPN предотвратил переход.`;
+      modal.classList.add('show');
+    }
+
+    function closeModal() {
+      modal.classList.remove('show');
+    }
+
+    // Vanish buttons when main window loses focus (e.g. user clicks into detached DevTools window)
+    window.addEventListener('blur', () => {
+      buttons.forEach(btn => {
+        btn.style.opacity = '0';
+        btn.style.pointerEvents = 'none';
+        btn.style.visibility = 'hidden';
+      });
+    });
+
+    window.addEventListener('focus', () => {
+      buttons.forEach(btn => {
+        btn.style.opacity = '1';
+        btn.style.pointerEvents = 'auto';
+        btn.style.visibility = 'visible';
+      });
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeModal();
+        return;
+      }
+
+      // Hard anti-cheat: Block Tab, Enter, Space and Arrow keys
+      if (e.key === 'Tab' || e.key === 'Enter' || e.code === 'Space' || e.key.startsWith('Arrow')) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (document.activeElement) document.activeElement.blur();
+
+        buttons.forEach(btn => {
+          btn.blur();
+          escapeButton(btn, window.innerWidth / 2, window.innerHeight / 2);
+        });
+        return;
+      }
+
+      // Block F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C, Ctrl+U
+      if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && ['I', 'i', 'J', 'j', 'C', 'c', 'K', 'k', 'E', 'e'].includes(e.key)) || (e.ctrlKey && (e.key === 'u' || e.key === 'U'))) {
+        e.preventDefault();
+        triggerAntiCheat('DEVTOOLS_SHORTCUT_BLOCKED');
+        return;
+      }
+
+      // Block Ctrl+S (Save), Ctrl+P (Print)
+      if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S' || e.key === 'p' || e.key === 'P')) {
+        e.preventDefault();
+        triggerAntiCheat('PAGE_SAVE_BLOCKED');
+        return;
+      }
+
+      // Block Ctrl+Shift+M (Firefox Responsive Design Mode)
+      if (e.ctrlKey && e.shiftKey && (e.key === 'M' || e.key === 'm')) {
+        e.preventDefault();
+        triggerAntiCheat('RESPONSIVE_MODE_BLOCKED');
+        return;
+      }
+    });
+
+    // Block copy, drag & drop
+    document.addEventListener('copy', (e) => e.preventDefault());
+    document.addEventListener('cut', (e) => e.preventDefault());
+    document.addEventListener('dragstart', (e) => e.preventDefault());
+    document.addEventListener('drop', (e) => e.preventDefault());
+
+    // DevTools anti-tamper & shield
+    let devtoolsTriggered = false;
+
+    function triggerAntiCheat(reason) {
+      if (devtoolsTriggered) return;
+      devtoolsTriggered = true;
+      document.body.innerHTML = `
+        <div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#0d0c11;color:#f0ecf4;font-family:-apple-system,BlinkMacSystemFont,sans-serif;text-align:center;padding:24px;">
+          <h1 style="font-size:32px;font-weight:800;margin-bottom:12px;letter-spacing:-0.5px;">Читер обнаружен</h1>
+          <p style="color:#948f99;font-size:16px;max-width:520px;line-height:1.6;margin-bottom:24px;">
+            Инспектор элементов и консоль заблокированы протоколом безопасности VibeVPN. Закрой DevTools и нажми F5, чтобы вернуться.
+          </p>
+          <div style="font-family:monospace;background:#16141c;border:1px solid rgba(255,255,255,0.08);padding:10px 18px;border-radius:8px;font-size:12px;color:#d0bcff;">
+            STATUS: ${reason || 'DEVTOOLS_TAMPER_DETECTED'}
+          </div>
+        </div>
+      `;
+    }
+
+    // 1. Docked DevTools & Mobile Emulator Detection (outer vs inner viewport delta)
+    function checkWindowTamper() {
+      const widthThreshold = (window.outerWidth - window.innerWidth) > 180;
+      const heightThreshold = (window.outerHeight - window.innerHeight) > 180;
+      if (widthThreshold || heightThreshold) {
+        triggerAntiCheat('EMULATOR_OR_DEVTOOLS_DETECTED');
+      }
+    }
+    window.addEventListener('resize', checkWindowTamper);
+    setInterval(checkWindowTamper, 800);
+    checkWindowTamper();
+
+    // 2. DOM Mutation Guardian (detects deleting or modifying buttons in Inspector)
+    const observer = new MutationObserver((mutations) => {
+      if (devtoolsTriggered) return;
+      for (const m of mutations) {
+        if (m.type === 'childList') {
+          for (const node of m.removedNodes) {
+            if (node.classList && (node.classList.contains('runaway-btn') || node.classList.contains('container'))) {
+              triggerAntiCheat('DOM_ELEMENT_DELETED');
+              return;
+            }
+          }
+        }
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    // Framebuster (prevents embedding into iframe)
+    if (window.top !== window.self) {
+      window.top.location = window.self.location;
+    }
+  </script>
+</body>
+</html>
